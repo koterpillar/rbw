@@ -33,6 +33,7 @@ pub async fn login(
     password: &crate::locked::Password,
     two_factor_token: Option<&str>,
     two_factor_provider: Option<crate::api::TwoFactorProviderType>,
+    new_device_otp: Option<&str>,
 ) -> Result<SessionParameters> {
     let (client, config) = api_client_async().await?;
     let crypto_params = client.prelogin(email).await?;
@@ -46,6 +47,7 @@ pub async fn login(
             &identity.master_password_hash,
             two_factor_token,
             two_factor_provider,
+            new_device_otp,
         )
         .await?;
 

@@ -346,6 +346,7 @@ impl Client {
             device_push_token: "",
             two_factor_token: None,
             two_factor_provider: None,
+            new_device_otp: None,
         };
 
         let res = ClientRequest::ConnectToken(connect_req).req(self).await?;
@@ -363,6 +364,7 @@ impl Client {
         password_hash: &crate::locked::PasswordHash,
         two_factor_token: Option<&str>,
         two_factor_provider: Option<TwoFactorProviderType>,
+        new_device_otp: Option<&str>,
     ) -> Result<(String, String, String)> {
         let (auth, grant_type, scope) = match sso_id {
             Some(sso_id) => {
@@ -399,6 +401,7 @@ impl Client {
             device_push_token: "",
             two_factor_token: two_factor_token,
             two_factor_provider: two_factor_provider.map(|ty| ty as u32),
+            new_device_otp,
         };
 
         let res = ClientRequest::Login(connect_req, email).req(self).await?;

@@ -168,6 +168,9 @@ pub enum Error {
     #[error("error waiting for pinentry to exit")]
     PinentryWait { source: tokio::io::Error },
 
+    #[error("new device verification required")]
+    NewDeviceVerificationRequired,
+
     #[error("This device has not yet been registered with the Bitwarden server. Run `rbw register` first, and then try again.")]
     RegistrationRequired,
 

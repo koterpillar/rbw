@@ -260,8 +260,68 @@ struct ConnectTokenReq<'a> {
     two_factor_token: Option<&'a str>,
     #[serde(rename = "twoFactorProvider")]
     two_factor_provider: Option<u32>,
+    // the code emailed by the server when logging in from an unrecognized
+    // device, for the new device verification flow
+    #[serde(rename = "newDeviceOtp")]
+    new_device_otp: Option<&'a str>,
     #[serde(flatten)]
     auth: ConnectTokenAuth<'a>,
+}
+
+#[cfg(test)]
+mod connect_token_req_tests {
+    use super::{ConnectTokenAuth, ConnectTokenReq};
+
+    fn req(new_device_otp: Option<&'static str>) -> ConnectTokenReq<'static> {
+        ConnectTokenReq {
+            grant_type: "password",
+            scope: "api offline_access",
+            client_id: "cli",
+            device_type: 8,
+            device_identifier: "device-id",
+            device_name: "rbw",
+            device_push_token: "",
+            two_factor_token: None,
+            two_factor_provider: None,
+            new_device_otp,
+            auth: ConnectTokenAuth::Password {
+                username: "user@example.com",
+                password: "master-password-hash",
+            },
+        }
+    }
+
+    // encode the way reqwest will when this is passed to `.form()`, so the
+    // assertions below are about the actual bytes sent to the server
+    fn encoded(new_device_otp: Option<&'static str>) -> String {
+        let body = reqwest::Client::new()
+            .post("https://example.com/connect/token")
+            .form(&req(new_device_otp))
+            .build()
+            .unwrap()
+            .body()
+            .unwrap()
+            .as_bytes()
+            .unwrap()
+            .to_vec();
+
+        String::from_utf8(body).unwrap()
+    }
+
+    // the server reads the new device verification code from a field spelled
+    // exactly this way, so a rename here silently breaks logging in from a new
+    // device
+    #[test]
+    fn sends_new_device_otp_when_present() {
+        assert!(encoded(Some("123456")).contains("newDeviceOtp=123456"));
+    }
+
+    // sending an empty newDeviceOtp makes the server treat the device as
+    // already-prompted, so it must be absent entirely when we don't have one
+    #[test]
+    fn omits_new_device_otp_when_absent() {
+        assert!(!encoded(None).contains("newDeviceOtp"));
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -314,6 +374,22 @@ impl TryFrom<ConnectErrorRes> for Error {
             "invalid_client" => {
                 return Ok(Error::IncorrectApiKey);
             }
+            // the server documents these descriptions as the contract clients
+            // use to drive the new device verification flow, so match on them
+            // rather than on the ErrorModel message
+            "device_error" => match error_desc {
+                Some("New device verification required") => {
+                    return Ok(Error::NewDeviceVerificationRequired);
+                }
+                Some("Invalid New Device OTP") => {
+                    if let Some(model) = value.error_model {
+                        return Ok(Error::IncorrectPassword {
+                            message: model.message,
+                        });
+                    }
+                }
+                _ => {}
+            },
             "" => {
                 // bitwarden_rs returns an empty error and error_description for
                 // this case, for some reason

@@ -169,7 +169,41 @@ impl Agent {
             let code = self.get_code(provider, &err, environment).await?;
             let code = std::str::from_utf8(code.password()).context("code was not valid utf8")?;
 
-            Ok(rbw::actions::login(email, password, Some(code), Some(provider)).await?)
+            Ok(rbw::actions::login(email, password, Some(code), Some(provider), None).await?)
+        })
+        .await
+    }
+
+    async fn get_new_device_otp(
+        &self,
+        err: &Option<String>,
+        environment: &rbw::protocol::Environment,
+    ) -> anyhow::Result<rbw::locked::Password> {
+        self.getpin(
+            "New Device Verification",
+            "Enter the code that was emailed to you to verify this device.",
+            err,
+            environment,
+            false,
+        )
+        .await
+        .context("failed to read new device verification code from pinentry")
+    }
+
+    // the server has already emailed the code by the time it tells us
+    // verification is required, so we only need to collect it and retry
+    async fn new_device_verification(
+        &self,
+        environment: &rbw::protocol::Environment,
+        password: &rbw::locked::Password,
+    ) -> anyhow::Result<SessionParameters> {
+        let email = self.email()?;
+
+        with_retry(|err| async move {
+            let code = self.get_new_device_otp(&err, environment).await?;
+            let code = std::str::from_utf8(code.password()).context("code was not valid utf8")?;
+
+            Ok(rbw::actions::login(email, password, None, None, Some(code)).await?)
         })
         .await
     }
@@ -239,7 +273,17 @@ impl Agent {
                 .get_password(&format!("Log in to {host}"), &err, environment)
                 .await?;
 
-            let r = match rbw::actions::login(&email, &password, None, None).await {
+            let r = match rbw::actions::login(&email, &password, None, None, None).await {
+                Err(Error::NewDeviceVerificationRequired) => {
+                    log::trace!("Login requires new device verification, performing it.");
+
+                    let ret = match self.new_device_verification(environment, &password).await {
+                        Ok(creds) => Ok((creds, password)),
+                        Err(e) => Err(anyhow::anyhow!("new device verification failed: {e}")),
+                    }?;
+
+                    Ok(ret)
+                }
                 Err(Error::TwoFactorRequired {
                     providers,
                     sso_email_2fa_session_token,
