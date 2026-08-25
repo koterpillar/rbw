@@ -490,6 +490,21 @@ impl<T> Entry<T> {
 }
 
 impl Entry<Encrypted> {
+    /// Decrypt this entry's folder name.
+    ///
+    /// Folder names are always encrypted with the user's own key, because
+    /// folders are local to a specific user's vault rather than belonging to an
+    /// organization or an individual item. Passing no entry to the decrypter is
+    /// what selects that key: handing it this entry would instead pull in the
+    /// entry's org key and its individual item encryption key, and decrypting
+    /// with either of those fails the MAC check.
+    pub fn decrypt_folder(
+        &self,
+        decrypter: &mut impl Decrypter<Encrypted>,
+    ) -> Result<Option<String>> {
+        decrypter.decrypt_optfield(None, &self.folder.as_deref())
+    }
+
     pub fn decrypt_custom_fields(
         &self,
         decrypter: &mut impl Decrypter<Encrypted>,
@@ -538,9 +553,7 @@ impl Entry<Encrypted> {
     }
 
     pub fn decrypt(&self, decrypter: &mut impl Decrypter<Encrypted>) -> Result<Entry<Decrypted>> {
-        // folder name should always be decrypted with the local key because
-        // folders are local to a specific user's vault, not the organization
-        let folder = self.decrypt_optstring(&self.folder, decrypter)?;
+        let folder = self.decrypt_folder(decrypter)?;
 
         let fields = self.decrypt_custom_fields(decrypter)?;
 
