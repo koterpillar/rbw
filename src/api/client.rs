@@ -24,6 +24,11 @@ use crate::{
 // https://github.com/bitwarden/server/blob/main/src/Core/Enums/BitwardenClient.cs
 const BITWARDEN_CLIENT: &str = "cli";
 
+// Used for the Bitwarden-Client-Version header. The server rejects edits from
+// clients it considers outdated, so this tracks a modern Bitwarden client
+// release rather than rbw's own version.
+const BITWARDEN_CLIENT_VERSION: &str = "2024.12.0";
+
 // DeviceType.LinuxDesktop, as per Bitwarden API device types.
 const DEVICE_TYPE: u8 = 8;
 
@@ -70,7 +75,7 @@ impl<'a> ClientRequest<'a> {
                 .get(client.api_url("/sync"))
                 .header("Authorization", format!("Bearer {access_token}"))
                 // This is necessary for vaultwarden to include the ssh keys in the response
-                .header("Bitwarden-Client-Version", "2024.12.0"),
+                .header("Bitwarden-Client-Version", BITWARDEN_CLIENT_VERSION),
             Self::ExchangeRefreshToken(refresh_token) => http_client
                 .post(client.identity_url("/connect/token"))
                 .form(&[
@@ -240,7 +245,7 @@ impl Client {
         );
         default_headers.insert(
             "Bitwarden-Client-Version",
-            axum::http::HeaderValue::from_static(env!("CARGO_PKG_VERSION")),
+            axum::http::HeaderValue::from_static(BITWARDEN_CLIENT_VERSION),
         );
         default_headers.append(
             "Device-Type",
