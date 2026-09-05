@@ -333,7 +333,7 @@ impl Client {
     ) -> Result<()> {
         let connect_req = ConnectTokenReq {
             auth: ConnectTokenAuth::ClientCredentials {
-                username: &email,
+                username: email,
                 client_secret: str::from_utf8(apikey.client_secret()).unwrap(),
             },
             grant_type: "client_credentials",
@@ -392,14 +392,14 @@ impl Client {
 
         let connect_req = ConnectTokenReq {
             auth,
-            grant_type: grant_type,
-            scope: scope,
+            grant_type,
+            scope,
             client_id: "cli",
             device_type: u32::from(DEVICE_TYPE),
             device_identifier: device_id,
             device_name: "rbw",
             device_push_token: "",
-            two_factor_token: two_factor_token,
+            two_factor_token,
             two_factor_provider: two_factor_provider.map(|ty| ty as u32),
             new_device_otp,
         };

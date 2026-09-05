@@ -38,7 +38,7 @@ pub async fn login(
     let (client, config) = api_client_async().await?;
     let crypto_params = client.prelogin(email).await?;
 
-    let identity = crate::identity::Identity::new(email, &password, &crypto_params)?;
+    let identity = crate::identity::Identity::new(email, password, &crypto_params)?;
     let (access_token, refresh_token, protected_key) = client
         .login(
             email,
@@ -95,18 +95,14 @@ pub fn unlock<S: std::hash::BuildHasher>(
     };
 
     let protected_private_key = crate::cipherstring::CipherString::new(protected_private_key)?;
-    let private_key = match protected_private_key.decrypt_locked_symmetric(&key) {
-        Ok(private_key) => crate::locked::PrivateKey::new(private_key),
-        Err(e) => return Err(e),
-    };
+    let locked_private_key = protected_private_key.decrypt_locked_symmetric(&key)?;
+    let private_key = crate::locked::PrivateKey::new(locked_private_key);
 
     let mut org_keys = std::collections::HashMap::new();
     for (org_id, protected_org_key) in protected_org_keys {
         let protected_org_key = crate::cipherstring::CipherString::new(protected_org_key)?;
-        let org_key = match protected_org_key.decrypt_locked_asymmetric(&private_key) {
-            Ok(org_key) => crate::locked::Keys::new(org_key),
-            Err(e) => return Err(e),
-        };
+        let locked_org_key = protected_org_key.decrypt_locked_asymmetric(&private_key)?;
+        let org_key = crate::locked::Keys::new(locked_org_key);
         org_keys.insert(org_id.clone(), org_key);
     }
 

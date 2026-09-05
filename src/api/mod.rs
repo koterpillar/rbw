@@ -361,7 +361,7 @@ impl TryFrom<ConnectErrorRes> for Error {
                 Some("Two factor required.") => {
                     if let Some(providers) = value.two_factor_providers {
                         return Ok(Error::TwoFactorRequired {
-                            providers: providers,
+                            providers,
                             sso_email_2fa_session_token: value.sso_email_2fa_session_token,
                         });
                     }
@@ -906,9 +906,7 @@ impl From<crate::db::HistoryEntry> for CipherHistoryEntry {
 
 impl From<CipherHistoryEntry> for Option<crate::db::HistoryEntry> {
     fn from(value: CipherHistoryEntry) -> Self {
-        let Some(password) = value.password else {
-            return None;
-        };
+        let password = value.password?;
 
         Some(crate::db::HistoryEntry {
             last_used_date: value.last_used_date,
@@ -997,7 +995,7 @@ impl SyncResCipher {
             id: self.id,
             org_id: self.organization_id,
             folder,
-            folder_id: folder_id,
+            folder_id,
             name: self.name,
             data: self.data.try_into()?,
             fields,
