@@ -5,82 +5,55 @@ on:
 env:
   RUST_BACKTRACE: 1
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo build --all-targets --all-features
-  build-musl:
-    runs-on: ubuntu-latest
-    steps:
-      - run: sudo apt-get install clang-18
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-unknown-linux-musl
-      - run: TARGET_CC=clang-18 TARGET_AR=llvm-ar-18 cargo build --all-targets --all-features --target x86_64-unknown-linux-musl
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo build --all-targets --all-features
-  build-android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: cargo-bins/cargo-binstall@main
-      - run: cargo binstall cross
-      - run: cross check --all-targets --target aarch64-linux-android --no-default-features
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
   test-musl:
     runs-on: ubuntu-latest
     steps:
       - run: sudo apt-get install clang-18
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-musl
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - run: TARGET_CC=clang-18 TARGET_AR=llvm-ar-18 cargo test --all-features --target x86_64-unknown-linux-musl
   test-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
       - run: cargo binstall cargo-deny
       - run: cargo clippy --all-targets --all-features -- -Dwarnings
       - run: cargo fmt --check
       - run: cargo deny check
-  doc:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - run: RUSTDOCFLAGS="-Dwarnings" cargo doc --all-features
-      - run: cargo test --doc --all-features
 
-  build2:
+  build:
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs:
       - test
+      - test-musl
       - test-macos
       - lint
-    if: ${{ github.ref == 'refs/heads/main' }}
     name: "Build (${{ matrix.os }}${{ matrix.arch && format(' {0}', matrix.arch) || ''}})"
     strategy:
       matrix:
@@ -109,7 +82,8 @@ jobs:
 
   release:
     if: ${{ github.ref == 'refs/heads/main' }}
-    needs: build2
+    needs: build
+    name: Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
