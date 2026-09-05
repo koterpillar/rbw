@@ -59,7 +59,7 @@ impl ssh_agent_lib::agent::Session for SshAgent {
             "Received SSH signature request for {}",
             pubkey
                 .to_openssh()
-                .map_err(|e| ssh_agent_lib::error::AgentError::other(e))?
+                .map_err(ssh_agent_lib::error::AgentError::other)?
         );
 
         let private_key = self
@@ -70,7 +70,7 @@ impl ssh_agent_lib::agent::Session for SshAgent {
 
         if self.agent.confirm_ssh() {
             let confirmed = rbw::pinentry::confirm(
-                &self.agent.config_pinentry(),
+                self.agent.config_pinentry(),
                 "Allow SSH key use?",
                 &self.agent.last_environment().await.clone(),
                 true,

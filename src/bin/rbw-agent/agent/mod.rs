@@ -415,7 +415,7 @@ impl Agent {
         if !matches!(action, rbw::protocol::Action::Decrypt { .. })
             && !matches!(action, rbw::protocol::Action::Encrypt { .. })
         {
-            log::trace!("Start of action: {:?}", &action);
+            log::trace!("Start of action: {:?}", action);
         }
 
         match &action {
@@ -472,7 +472,7 @@ impl Agent {
         if !matches!(action, rbw::protocol::Action::Decrypt { .. })
             && !matches!(action, rbw::protocol::Action::Encrypt { .. })
         {
-            log::trace!("End of action: {:?}", &action);
+            log::trace!("End of action: {:?}", action);
         }
 
         self.set_last_environment(environment).await;

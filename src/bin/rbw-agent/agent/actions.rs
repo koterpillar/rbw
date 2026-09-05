@@ -126,11 +126,11 @@ impl Agent {
 
         with_retry(|e| async move {
             let (client_id, client_secret) =
-                self.get_client_id_secret(&host, &e, environment).await?;
+                self.get_client_id_secret(host, &e, environment).await?;
 
             let apikey = rbw::locked::ApiKey::new(client_id, client_secret);
 
-            Ok(rbw::actions::register(&email, apikey).await?)
+            Ok(rbw::actions::register(email, apikey).await?)
         })
         .await
         .context("failed to log in to bitwarden instance")?;
@@ -273,7 +273,7 @@ impl Agent {
                 .get_password(&format!("Log in to {host}"), &err, environment)
                 .await?;
 
-            let r = match rbw::actions::login(&email, &password, None, None, None).await {
+            let r = match rbw::actions::login(email, &password, None, None, None).await {
                 Err(Error::NewDeviceVerificationRequired) => {
                     log::trace!("Login requires new device verification, performing it.");
 
@@ -372,7 +372,7 @@ impl Agent {
 
     pub async fn sync(&self, sock: Option<&mut crate::sock::Sock>) -> anyhow::Result<()> {
         // Sync is the only one that reads an updated copy of the db from disk
-        let db = Db::load_async(&self.server_name(), &self.email()?).await?;
+        let db = Db::load_async(&self.server_name(), self.email()?).await?;
         log::trace!("Read fresh db from disk");
 
         let Some(access_token) = &db.access_token else {
@@ -541,12 +541,12 @@ impl Agent {
                 .ok_or(Error::UnavailableDbProtectedKeys)?;
 
         let (keys, org_keys) = rbw::actions::unlock(
-            &self.email()?,
+            self.email()?,
             password,
             &db.get_crypto_parameters()?,
-            &protected_key,
-            &protected_private_key,
-            &protected_org_keys,
+            protected_key,
+            protected_private_key,
+            protected_org_keys,
         )?;
 
         self.set_keys(keys, org_keys).await;

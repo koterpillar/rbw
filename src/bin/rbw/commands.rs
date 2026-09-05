@@ -98,6 +98,7 @@ impl SearchEntry {
             .map_or_else(|| self.name.clone(), |user| format!("{user}@{}", self.name))
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn matches(
         &self,
         needle: &Needle,
