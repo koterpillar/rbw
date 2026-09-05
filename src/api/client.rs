@@ -356,6 +356,7 @@ impl Client {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn login(
         &self,
         email: &str,

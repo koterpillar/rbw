@@ -117,7 +117,7 @@ impl<R: AsyncRead + Unpin, W: AsyncWrite + Unpin> Pinentry<R, W> {
 
     async fn command(&mut self, command: &str) -> Result<LockedVec> {
         self.writer
-            .write_all(&format!("{command}\n").as_bytes())
+            .write_all(format!("{command}\n").as_bytes())
             .await
             .map_err(|source| Error::WriteStdin { source })?;
 
@@ -128,8 +128,7 @@ impl<R: AsyncRead + Unpin, W: AsyncWrite + Unpin> Pinentry<R, W> {
 
             if line_str.starts_with("OK") {
                 return Ok(line);
-            } else if line_str.starts_with("ERR ") {
-                let err = &line_str[4..];
+            } else if let Some(err) = line_str.strip_prefix("ERR ") {
                 let mut split = err.splitn(2, ' ');
                 let code = split.next();
                 match code {

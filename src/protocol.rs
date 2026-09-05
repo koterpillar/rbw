@@ -142,7 +142,7 @@ impl Environment {
         self.tty.as_ref().map(|tty| tty.0.as_os_str())
     }
 
-    pub fn env_vars<'a>(&'a self) -> std::collections::HashMap<&'a OsStr, &'a OsStr> {
+    pub fn env_vars(&self) -> std::collections::HashMap<&OsStr, &OsStr> {
         self.env_vars
             .iter()
             .map(|(var, val)| (var.0.as_os_str(), val.0.as_os_str()))

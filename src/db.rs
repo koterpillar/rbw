@@ -141,6 +141,7 @@ pub struct DynamicField {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Eq, PartialEq)]
+#[allow(clippy::large_enum_variant)]
 pub enum EntryData {
     Login {
         username: Option<String>,
@@ -800,7 +801,7 @@ pub struct Uri {
 
 impl Display for Uri {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "URI: {}", &self.uri)?;
+        writeln!(f, "URI: {}", self.uri)?;
 
         if let Some(ty) = self.match_type {
             writeln!(f, "Match type: {ty}")?;

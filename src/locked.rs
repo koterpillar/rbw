@@ -72,6 +72,10 @@ impl LockedVec {
         self.data.1
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn push(&mut self, el: u8) {
         let len = self.len();
 
