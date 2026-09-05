@@ -11,6 +11,17 @@ similar to the way that `ssh-agent` or `gpg-agent` work. This allows the client
 to be used in a much simpler way, with the background agent taking care of
 maintaining the necessary state.
 
+## Fork, again
+
+This is a fork of
+[deade1e/rbw#refactor](https://github.com/deade1e/rbw/tree/refactor) that was
+fixed to work with the latest Bitwarden. I added automatic
+[release](https://github.com/koterpillar/rbw/releases/latest) publishing to have
+a fresh version.
+
+I intend to keep up to date with either upstream and contribute the patches
+back when I have free time.
+
 ## Fork
 
 Since the original developer of this project has not been active in the last
