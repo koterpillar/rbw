@@ -2,7 +2,6 @@ name: tests
 on:
   push:
     branches: [main]
-  pull_request: {}
 env:
   RUST_BACKTRACE: 1
 jobs:
@@ -75,3 +74,66 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: RUSTDOCFLAGS="-Dwarnings" cargo doc --all-features
       - run: cargo test --doc --all-features
+
+  build2:
+    needs:
+      - test
+      - lint
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: "Build (${{ matrix.os }}${{ matrix.arch && format(' {0}', matrix.arch) || ''}})"
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu
+          - os: ubuntu
+            arch: arm
+          - os: macos
+    runs-on: ${{ matrix.arch && format('ubuntu-24.04-{0}', matrix.arch) || format('{0}-latest', matrix.os) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Compile
+        run: cargo +stable build --release
+      - name: Archive executables
+        run: tar -czf rbw-$(uname)-$(uname -m).tar.gz target/release/rbw target/release/rbw-agent
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: executable-${{ runner.os }}-${{ runner.arch }}
+          path: rbw-*
+
+  release:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: build2
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download binaries
+        uses: actions/download-artifact@v7
+        with:
+          pattern: 'executable-*'
+          merge-multiple: true
+      - name: Set version
+        run: echo "RELEASE_VERSION=$(cargo pkgid | cut -d# -f2)" >> "$GITHUB_ENV"
+      - name: Check version
+        run: 'echo "Release version: ${{ env.RELEASE_VERSION }}"'
+      - name: Delete existing release and tag
+        run: |
+          gh release delete "${{ env.RELEASE_VERSION }}" --yes --cleanup-tag || echo "Release ${{ env.RELEASE_VERSION }} does not exist"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: 'executable-*'
+          removeArtifacts: true
+          replacesArtifacts: true
+          tag: ${{ env.RELEASE_VERSION }}
