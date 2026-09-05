@@ -1,4 +1,7 @@
-use std::{ops::{Deref, DerefMut}, str::Utf8Error};
+use std::{
+    ops::{Deref, DerefMut},
+    str::Utf8Error,
+};
 
 use zeroize::Zeroize;
 
