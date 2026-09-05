@@ -78,6 +78,7 @@ jobs:
   build2:
     needs:
       - test
+      - test-macos
       - lint
     if: ${{ github.ref == 'refs/heads/main' }}
     name: "Build (${{ matrix.os }}${{ matrix.arch && format(' {0}', matrix.arch) || ''}})"
