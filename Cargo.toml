@@ -70,7 +70,7 @@ tempfile = "3.27.0"
 terminal_size = "0.4.4"
 textwrap = "0.16.2"
 thiserror = "2.0.20"
-tokio-tungstenite = { version = "0.28", features = [
+tokio-tungstenite = { version = "0.30.0", features = [
     "rustls-tls-native-roots",
     "url",
 ] }
