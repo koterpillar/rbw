@@ -25,14 +25,6 @@ deny = [
     { name = "openssl-sys" },
 ]
 skip = [
-    # https://github.com/darfink/region-rs/pull/25
-    { name = "bitflags", version = "1.3.2" },
-    { name = "bitflags", version = "2.4.1" },
-    # ssh-agent-lib is holding this back
-    { name = "thiserror", version = "1.0.69" },
-    { name = "thiserror", version = "2.0.17" },
-    { name = "thiserror-impl", version = "1.0.69" },
-    { name = "thiserror-impl", version = "2.0.17" },
     # until the rand 0.8 -> 0.9 transition finished making its way through
     # the crate ecosystem
     { name = "rand", version = "0.8.5" },
