@@ -42,7 +42,7 @@ pbkdf2 = "0.12.2"
 percent-encoding = "2.3.2"
 pkcs8 = "0.10.2"
 # TODO: necessary because some packages still depend on old rand
-rand_8 = { package = "rand", version = "0.8.5" }
+rand_8 = { package = "rand", version = "0.10.2" }
 rand = "0.10.2"
 regex = "1.13.1"
 region = "4.0.0"
