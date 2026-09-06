@@ -25,6 +25,8 @@ deny = [
     { name = "openssl-sys" },
 ]
 skip = [
+    { name = "cpufeatures", version = "0.2.17" },
+    { name = "cpufeatures", version = "0.3.1" },
     # until the rand 0.8 -> 0.9 transition finished making its way through
     # the crate ecosystem
     { name = "rand", version = "0.8.5" },
@@ -35,6 +37,8 @@ skip = [
     { name = "rand_chacha", version = "0.9.0" },
     { name = "getrandom", version = "0.2.16" },
     { name = "getrandom", version = "0.3.4" },
+    { name = "syn", version = "2.0.111" },
+    { name = "syn", version = "3.0.5" },
 ]
 
 [licenses]
