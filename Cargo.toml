@@ -67,7 +67,7 @@ sha2 = "0.10.9"
 signature = "2.2.0"
 ssh-agent-lib = "0.5.1"
 tempfile = "3.24.0"
-terminal_size = "0.4.3"
+terminal_size = "0.4.4"
 textwrap = "0.16.2"
 thiserror = "2.0.17"
 tokio-tungstenite = { version = "0.28", features = [
