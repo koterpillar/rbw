@@ -41,7 +41,7 @@ impl ssh_agent_lib::agent::Session for SshAgent {
             .map(|p| {
                 p.parse::<ssh_agent_lib::ssh_key::PublicKey>()
                     .map(|pk| ssh_agent_lib::proto::Identity {
-                        pubkey: pk.key_data().clone(),
+                        credential: pk.key_data().clone().into(),
                         comment: String::new(),
                     })
                     .map_err(ssh_agent_lib::error::AgentError::other)
@@ -53,7 +53,8 @@ impl ssh_agent_lib::agent::Session for SshAgent {
         &mut self,
         request: ssh_agent_lib::proto::SignRequest,
     ) -> Result<ssh_agent_lib::ssh_key::Signature, ssh_agent_lib::error::AgentError> {
-        let pubkey = ssh_agent_lib::ssh_key::PublicKey::new(request.pubkey, "");
+        let pubkey =
+            ssh_agent_lib::ssh_key::PublicKey::new(request.credential.key_data().clone(), "");
 
         log::debug!(
             "Received SSH signature request for {}",
