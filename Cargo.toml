@@ -32,7 +32,7 @@ env_logger = "0.11.11"
 futures = "0.3.34"
 futures-channel = "0.3.34"
 futures-util = "0.3.34"
-hkdf = "0.12.4"
+hkdf = "0.13.0"
 hmac = { version = "0.12.1", features = ["std"] }
 humantime = "2.4.0"
 libc = "0.2.189"
