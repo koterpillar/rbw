@@ -3,7 +3,7 @@ use crate::prelude::*;
 use aes::cipher::{BlockDecryptMut as _, BlockEncryptMut as _, KeyIvInit as _};
 use hmac::Mac as _;
 use pkcs8::DecodePrivateKey as _;
-use rand::RngCore as _;
+use rand::Rng as _;
 use zeroize::Zeroize as _;
 
 pub enum CipherString {
