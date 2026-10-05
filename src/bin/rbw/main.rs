@@ -10,7 +10,7 @@ mod sock;
 #[derive(Debug, clap::Args)]
 pub struct FindArgs {
     #[arg(help = "Name, URI or UUID of the entry to display")]
-    needle: commands::Needle,
+    needle: rbw::search::Needle,
     #[arg(help = "Username of the entry to display")]
     user: Option<String>,
     #[arg(long, help = "Folder name to search in")]
