@@ -678,7 +678,7 @@ dependencies = [
  "digest",
  "elliptic-curve",
  "rfc6979",
- "signature",
+ "signature 2.2.0",
  "spki",
 ]
 
@@ -688,7 +688,7 @@ version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "115531babc129696a58c64a4fef0a8bf9e9698629fb97e9e40767d235cfbcd53"
 dependencies = [
- "signature",
+ "signature 2.2.0",
 ]
 
 [[package]]
@@ -2134,7 +2134,7 @@ dependencies = [
  "serde_repr",
  "sha1",
  "sha2",
- "signature",
+ "signature 3.0.0",
  "ssh-agent-lib",
  "tempfile",
  "terminal_size",
@@ -2306,7 +2306,7 @@ dependencies = [
  "pkcs8",
  "rand_core 0.6.4",
  "sha2",
- "signature",
+ "signature 2.2.0",
  "spki",
  "subtle",
  "zeroize",
@@ -2638,6 +2638,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "signature"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28d567dcbaf0049cb8ac2608a76cd95ff9e4412e1899d389ee400918ca7537f5"
+
+[[package]]
 name = "simd_cesu8"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2709,7 +2715,7 @@ dependencies = [
  "log",
  "secrecy",
  "service-binding",
- "signature",
+ "signature 2.2.0",
  "ssh-encoding",
  "ssh-key",
  "subtle",
@@ -2754,7 +2760,7 @@ dependencies = [
  "rsa",
  "sec1",
  "sha2",
- "signature",
+ "signature 2.2.0",
  "ssh-cipher",
  "ssh-encoding",
  "subtle",
