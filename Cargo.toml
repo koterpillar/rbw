@@ -35,7 +35,7 @@ futures-util = "0.3.34"
 hkdf = "0.12.4"
 hmac = { version = "0.12.1", features = ["std"] }
 humantime = "2.4.0"
-libc = "0.2.189"
+libc = "0.2.190"
 log = "0.4.34"
 open = "5.4.3"
 pbkdf2 = "0.12.2"
