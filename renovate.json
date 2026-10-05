@@ -5,6 +5,9 @@
     ":automergeMinor"
   ],
   "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "customType": "regex",
