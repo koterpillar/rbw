@@ -68,7 +68,7 @@ signature = "2.2.0"
 ssh-agent-lib = "0.6.0"
 tempfile = "3.27.0"
 terminal_size = "0.4.4"
-textwrap = "0.16.2"
+textwrap = "0.16.4"
 thiserror = "2.0.21"
 tokio-tungstenite = { version = "0.28", features = [
     "rustls-tls-native-roots",
