@@ -16,7 +16,7 @@ include = ["src/**/*", "bin/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 [dependencies]
 aes = "0.8.4"
 anyhow = "1.0.104"
-argon2 = "0.5.3"
+argon2 = "0.6.0"
 axum = "0.8.9"
 base32 = "0.5.1"
 base64 = "0.22.1"
