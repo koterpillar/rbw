@@ -39,6 +39,13 @@ skip = [
     { name = "getrandom", version = "0.3.4" },
     { name = "syn", version = "2.0.111" },
     { name = "syn", version = "3.0.5" },
+    # hyper-util and reqwest/indexmap pull in different transitive versions
+    # of these; nothing in our direct control, will resolve itself once
+    # those crates converge
+    { name = "base64", version = "0.22.1" },
+    { name = "base64", version = "0.23.1" },
+    { name = "hashbrown", version = "0.15.5" },
+    { name = "hashbrown", version = "0.17.1" },
 ]
 
 [licenses]
