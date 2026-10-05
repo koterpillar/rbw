@@ -20,6 +20,17 @@
     {
       "matchPackageNames": ["actions/node-versions"],
       "extractVersion": "^(?<version>v\\d+)"
+    },
+    {
+      "groupName": "RustCrypto ecosystem",
+      "matchPackageNames": [
+        "aes", "argon2", "base64", "block-padding", "cbc", "hkdf", "hmac",
+        "pbkdf2", "pkcs8", "sha1", "sha2", "signature"
+      ]
+    },
+    {
+      "matchPackageNames": ["rand_8"],
+      "enabled": false
     }
   ],
   "forkProcessing": "enabled"
