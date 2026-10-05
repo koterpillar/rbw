@@ -7,6 +7,7 @@ pkgs.mkShell {
     gdb
     rustc
     cargo
+    cargo-deny
     rust-analyzer
     rustfmt
     clippy

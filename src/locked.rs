@@ -64,14 +64,14 @@ impl LockedVec {
     }
 
     pub fn as_str(&self) -> Result<&str, Utf8Error> {
-        str::from_utf8(self)
+        std::str::from_utf8(self)
     }
 
     pub fn capacity(&self) -> usize {
         LEN
     }
 
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.data.1
     }
 

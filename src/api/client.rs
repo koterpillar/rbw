@@ -334,12 +334,12 @@ impl Client {
         let connect_req = ConnectTokenReq {
             auth: ConnectTokenAuth::ClientCredentials {
                 username: email,
-                client_secret: str::from_utf8(apikey.client_secret()).unwrap(),
+                client_secret: std::str::from_utf8(apikey.client_secret()).unwrap(),
             },
             grant_type: "client_credentials",
             scope: "api",
             // XXX unwraps here are not necessarily safe
-            client_id: str::from_utf8(apikey.client_id()).unwrap(),
+            client_id: std::str::from_utf8(apikey.client_id()).unwrap(),
             device_type: u32::from(DEVICE_TYPE),
             device_identifier: device_id,
             device_name: "rbw",

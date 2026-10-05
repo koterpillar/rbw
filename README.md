@@ -13,8 +13,7 @@ maintaining the necessary state.
 
 ## Fork, again
 
-This is a fork of
-[deade1e/rbw#refactor](https://github.com/deade1e/rbw/tree/refactor) that was
+This is a fork of [deade1e/rbw](https://github.com/deade1e/rbw) that was
 fixed to work with the latest Bitwarden. I added automatic
 [release](https://github.com/koterpillar/rbw/releases/latest) publishing to have
 a fresh version.

@@ -1,4 +1,5 @@
 name: tests
+
 on:
   push:
     branches: [main]
@@ -37,6 +38,16 @@ jobs:
       - run: cargo clippy --all-targets --all-features -- -Dwarnings
       - run: cargo fmt --check
       - run: cargo deny check
+
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - run: RUSTDOCFLAGS="-Dwarnings" cargo doc --all-features
+      - run: cargo test --doc --all-features
 
   build:
     if: ${{ github.ref == 'refs/heads/main' }}
