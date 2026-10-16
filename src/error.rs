@@ -27,7 +27,7 @@ pub enum Error {
     EncryptRemote,
 
     #[error("failed to decrypt")]
-    Decrypt { source: block_padding::UnpadError },
+    Decrypt { source: block_padding::Error },
 
     #[error("failed to decrypt remotely")]
     DecryptRemote,
