@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use aes::cipher::{BlockDecryptMut as _, BlockEncryptMut as _, KeyIvInit as _};
-use hmac::Mac as _;
+use aes::cipher::{BlockModeDecrypt as _, BlockModeEncrypt as _, KeyIvInit as _};
+use hmac::{KeyInit as _, Mac as _};
 use pkcs8::DecodePrivateKey as _;
 use rand::Rng as _;
 use zeroize::Zeroize as _;
@@ -89,9 +89,9 @@ impl CipherString {
     pub fn encrypt_symmetric(keys: &crate::locked::Keys, plaintext: &[u8]) -> Result<Self> {
         let iv = random_iv();
 
-        let cipher =
-            cbc::Encryptor::<aes::Aes256>::new(keys.enc_key().into(), iv.as_slice().into());
-        let ciphertext = cipher.encrypt_padded_vec_mut::<block_padding::Pkcs7>(plaintext);
+        let cipher = cbc::Encryptor::<aes::Aes256>::new_from_slices(keys.enc_key(), &iv)
+            .map_err(|source| Error::CreateBlockMode { source })?;
+        let ciphertext = cipher.encrypt_padded_vec::<block_padding::Pkcs7>(plaintext);
 
         let mut digest = hmac::Hmac::<sha2::Sha256>::new_from_slice(keys.mac_key())
             .map_err(|source| Error::CreateHmac { source })?;
@@ -125,7 +125,7 @@ impl CipherString {
         let cipher =
             decrypt_common_symmetric(entry_key.unwrap_or(keys), iv, ciphertext, mac.as_deref())?;
         cipher
-            .decrypt_padded_vec_mut::<block_padding::Pkcs7>(ciphertext)
+            .decrypt_padded_vec::<block_padding::Pkcs7>(ciphertext)
             .map_err(|source| Error::Decrypt { source })
     }
 
@@ -148,7 +148,7 @@ impl CipherString {
         res.extend(ciphertext.iter().copied());
         let cipher = decrypt_common_symmetric(keys, iv, ciphertext, mac.as_deref())?;
         cipher
-            .decrypt_padded_mut::<block_padding::Pkcs7>(&mut res)
+            .decrypt_padded::<block_padding::Pkcs7>(&mut res)
             .map_err(|source| Error::Decrypt { source })?;
         Ok(res)
     }
@@ -194,7 +194,7 @@ fn decrypt_common_symmetric(
         key.update(iv);
         key.update(ciphertext);
 
-        if key.verify(mac.into()).is_err() {
+        if key.verify_slice(mac).is_err() {
             return Err(Error::InvalidMac);
         }
     }
