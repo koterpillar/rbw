@@ -101,14 +101,14 @@ impl ssh_agent_lib::agent::Session for SshAgent {
                 let mut rng = rand_8::rngs::OsRng;
 
                 let (algorithm, sig_bytes) = if request.flags & SSH_AGENT_RSA_SHA2_512 != 0 {
-                    let signing_key = rsa::pkcs1v15::SigningKey::<sha2::Sha512>::new(rsa_key);
+                    let signing_key = rsa::pkcs1v15::SigningKey::<sha2_10::Sha512>::new(rsa_key);
                     let signature = signing_key
                         .try_sign_with_rng(&mut rng, &request.data)
                         .map_err(ssh_agent_lib::error::AgentError::other)?;
 
                     ("rsa-sha2-512", signature.to_bytes())
                 } else if request.flags & SSH_AGENT_RSA_SHA2_256 != 0 {
-                    let signing_key = rsa::pkcs1v15::SigningKey::<sha2::Sha256>::new(rsa_key);
+                    let signing_key = rsa::pkcs1v15::SigningKey::<sha2_10::Sha256>::new(rsa_key);
                     let signature = signing_key
                         .try_sign_with_rng(&mut rng, &request.data)
                         .map_err(ssh_agent_lib::error::AgentError::other)?;
