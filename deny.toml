@@ -15,6 +15,11 @@ ignore = [
     # this is only a warning about being unmaintained, the only known
     # undefined behavior is in a function we don't use
     "RUSTSEC-2025-0069",
+    # this is a timing attack against crypto-bigint 0.5 (pulled in via
+    # ssh-agent-lib -> ssh-key -> p256/p384/p521), but the ssh agent only
+    # signs with ed25519 and rsa keys, so ecdsa arithmetic is never done on
+    # secrets. remove once ssh-agent-lib moves to ssh-key 0.7
+    "RUSTSEC-2026-0387",
 ]
 
 [bans]
