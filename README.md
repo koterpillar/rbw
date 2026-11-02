@@ -43,9 +43,6 @@ I couldn't do anything about it, as it was way easier to do things this way.
 However it should not impact any actual tool built on rbw, but beware, the bug
 is behind the corner!
 
-Oh and there also is my confirm ssh feature baked in the code, which is totally
-optional.
-
 ## Maintenance
 
 I DO NOT consider rbw to be essentially feature-complete, BUT in this first
@@ -142,8 +139,6 @@ configuration options:
 * `pinentry`: The
   [pinentry](https://www.gnupg.org/related_software/pinentry/index.html)
   executable to use. Defaults to `pinentry`.
-* `confirm_ssh`: If set to `true` will ask for confirmation for SSH signature
-requests. If unset defaults to not asking.
 
 ### Profiles
 
@@ -185,21 +180,6 @@ order to use `rbw` with the official Bitwarden server, you will need to first
 run `rbw register` to register each device using `rbw` with the Bitwarden
 server. This will prompt you for your personal API key which you can find using
 the instructions [here](https://bitwarden.com/help/article/personal-api-key/).
-
-### SSH Agent
-
-`rbw-agent` includes a built-in SSH agent for signing SSH authentication
-challenges directly. To use it, ensure that rbw is running (in order to make
-it start handling ssh agent requests), and then point your SSH client to the
-SSH agent socket:
-
-```sh
-rbw unlock
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/rbw/ssh-agent-socket"
-```
-
-If you're using a profile, the socket will be located at
-`"XDG_RUNTIME_DIR/rbw-<profile>/ssh-agent-socket"`.
 
 ### 2FA support
 

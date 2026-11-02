@@ -19,7 +19,6 @@ use tokio::{
 use crate::notifications::NotificationsHandler;
 
 mod actions;
-pub mod ssh_agent;
 
 struct InnerAgent {
     priv_key: RwLock<Option<Arc<rbw::locked::Keys>>>,
@@ -32,18 +31,6 @@ struct InnerAgent {
     master_password_reprompt_initialized: AtomicBool,
     config: rbw::config::Config,
     pub db: RwLock<Db>,
-
-    // this is stored here specifically for the use of the ssh agent, because
-    // requests made to the ssh agent don't include an environment, and so we
-    // can't properly initialize the pinentry process. we work around this by
-    // just reusing the last environment we saw being sent to the main agent
-    // (there should be at least one in most cases because you need to start
-    // the rbw agent in order to make it start serving on the ssh agent
-    // socket, and that initial request should come with an environment).
-    //
-    // we should not use this for any requests on the main agent, those
-    // should all send their own environment over.
-    pub last_environment: RwLock<rbw::protocol::Environment>,
 
     #[cfg(feature = "clipboard")]
     pub clipboard: Mutex<Option<arboard::Clipboard>>,
@@ -85,7 +72,6 @@ impl Agent {
                 master_password_reprompt_initialized: AtomicBool::new(false),
                 config,
                 db: RwLock::new(db),
-                last_environment: RwLock::new(rbw::protocol::Environment::default()),
 
                 #[cfg(feature = "clipboard")]
                 clipboard: Mutex::new(
@@ -262,16 +248,6 @@ impl Agent {
             .load(std::sync::atomic::Ordering::Relaxed)
     }
 
-    pub async fn last_environment(
-        &self,
-    ) -> tokio::sync::RwLockReadGuard<'_, rbw::protocol::Environment> {
-        self.inner.last_environment.read().await
-    }
-
-    pub async fn set_last_environment(&self, environment: rbw::protocol::Environment) {
-        *self.inner.last_environment.write().await = environment;
-    }
-
     pub fn email(&self) -> Result<&str> {
         self.inner
             .config
@@ -301,9 +277,6 @@ impl Agent {
         self.inner.clipboard.lock().await
     }
 
-    pub fn confirm_ssh(&self) -> bool {
-        self.inner.config.confirm_ssh.is_some_and(|o| o)
-    }
     async fn sleep_until_deadline(deadline: Option<Instant>) {
         match deadline {
             Some(d) => sleep_until(d).await,
@@ -474,8 +447,6 @@ impl Agent {
         {
             log::trace!("End of action: {:?}", action);
         }
-
-        self.set_last_environment(environment).await;
 
         // Reset lock timeout on these request types
         match &action {
