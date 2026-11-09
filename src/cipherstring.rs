@@ -165,10 +165,10 @@ impl CipherString {
 
         let privkey_data = private_key.private_key();
         let privkey_data = pkcs7_unpad(privkey_data).ok_or(Error::Padding)?;
-        let pkey = rsa::RsaPrivateKey::from_pkcs8_der(privkey_data)
+        let pkey = rsa::PrivateKey::from_pkcs8_der(privkey_data)
             .map_err(|source| Error::RsaPkcs8 { source })?;
         let mut bytes = pkey
-            .decrypt(rsa::Oaep::new::<sha1::Sha1>(), ciphertext)
+            .decrypt(rsa::Oaep::<sha1::Sha1>::new(), ciphertext)
             .map_err(|source| Error::Rsa { source })?;
 
         // XXX it'd be great if the rsa crate would let us decrypt
