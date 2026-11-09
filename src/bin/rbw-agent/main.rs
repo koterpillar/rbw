@@ -18,14 +18,11 @@ async fn async_main(startup_ack: Option<crate::daemon::StartupAck>) -> anyhow::R
 
     let agent = crate::agent::Agent::new(config).await;
 
-    let ssh_agent = crate::agent::ssh_agent::SshAgent::new(agent.clone());
-
     let mut sigterm = signal(SignalKind::terminate())?;
     let mut sigint = signal(SignalKind::interrupt())?;
 
     tokio::select!(
         _ = agent.run(listener) => {},
-        _ = ssh_agent.run() => {},
         _ = sigint.recv() => {
             log::warn!("SIGINT received. Closing the application.");
         },

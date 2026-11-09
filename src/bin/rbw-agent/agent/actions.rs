@@ -3,7 +3,7 @@ use std::future::Future;
 use anyhow::Context as _;
 use rbw::{
     actions::SessionParameters,
-    db::{Db, EntryData},
+    db::Db,
     error::{Error, Result},
 };
 use sha2::Digest as _;
@@ -616,102 +616,6 @@ impl Agent {
         }
 
         Ok(())
-    }
-
-    pub async fn get_ssh_public_keys(&self) -> anyhow::Result<Vec<String>> {
-        let environment = { self.last_environment().await.clone() };
-
-        log::trace!("Resetting lock timeout due to get_ssh_public_keys");
-        self.reset_lock_timeout().await;
-
-        log::trace!("Trying to unlock state");
-        self.unlock_state(&environment).await?;
-
-        let db = self.inner.db.read().await;
-
-        let enc_pubkeys: Vec<(String, Option<String>, Option<String>)> = db
-            .entries
-            .iter()
-            .filter_map(|e| {
-                if let EntryData::SshKey {
-                    public_key: Some(pubkey),
-                    ..
-                } = &e.data
-                {
-                    Some((pubkey.clone(), e.key.clone(), e.org_id.clone()))
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        drop(db);
-
-        let mut pubkeys = vec![];
-
-        for (e, entry_key, org_id) in enc_pubkeys {
-            let pubkey = self
-                .decrypt_cipher(&environment, &e, entry_key.as_deref(), org_id.as_deref())
-                .await?;
-            pubkeys.push(pubkey);
-        }
-
-        Ok(pubkeys)
-    }
-
-    pub async fn find_ssh_private_key(
-        &self,
-        request_public_key: ssh_agent_lib::ssh_key::PublicKey,
-    ) -> anyhow::Result<ssh_agent_lib::ssh_key::PrivateKey> {
-        let environment = {
-            let le = self.last_environment().await;
-            self.reset_lock_timeout().await;
-            le.clone()
-        };
-
-        self.unlock_state(&environment).await?;
-
-        let request_bytes = request_public_key.to_bytes();
-
-        let db = self.inner.db.read().await;
-
-        // Collect all ssh keys that are Some()
-        let keys: Vec<(&String, &String, &Option<String>, &Option<String>)> = db
-            .entries
-            .iter()
-            .filter_map(|e| match &e.data {
-                rbw::db::EntryData::SshKey {
-                    private_key,
-                    public_key,
-                    ..
-                } => match (public_key, private_key) {
-                    (Some(public), Some(private)) => Some((public, private, &e.key, &e.org_id)),
-                    _ => None,
-                },
-                _ => None,
-            })
-            .collect();
-
-        for (public, private, key, org_id) in keys {
-            let pub_plain = self
-                .decrypt_cipher(&environment, public, key.as_deref(), org_id.as_deref())
-                .await?;
-
-            let pub_bytes = ssh_agent_lib::ssh_key::PublicKey::from_openssh(&pub_plain)?.to_bytes();
-
-            if pub_bytes != request_bytes {
-                continue;
-            }
-
-            let priv_plain = self
-                .decrypt_cipher(&environment, private, key.as_deref(), org_id.as_deref())
-                .await?;
-
-            return ssh_agent_lib::ssh_key::PrivateKey::from_openssh(priv_plain)
-                .map_err(anyhow::Error::new);
-        }
-
-        Err(anyhow::anyhow!("No matching private key found"))
     }
 
     pub async fn subscribe_to_notifications(&self) -> anyhow::Result<()> {

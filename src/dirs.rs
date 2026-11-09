@@ -69,10 +69,6 @@ pub fn socket_file() -> Result<PathBuf> {
     Ok(runtime_dir()?.join("socket"))
 }
 
-pub fn ssh_agent_socket_file() -> Result<PathBuf> {
-    Ok(runtime_dir()?.join("ssh-agent-socket"))
-}
-
 fn project_dirs() -> Result<ProjectDirs> {
     ProjectDirs::from("", "", &profile()).ok_or(crate::error::Error::FailedToFindDataDirectory)
 }

@@ -4,12 +4,13 @@
 
 ## Added
 
-* Added `confirm_ssh` configuration option. When set to `true`, the agent will
-  ask for pinentry confirmation before every SSH signature request.
 * Added Nix flake support (`flake.nix`, `flake.lock`, `shell.nix`).
 
 ## Changed
 
+* Removed the built-in SSH agent (and the `confirm_ssh` option). `ssh-agent-lib`
+  pins the old RustCrypto stack and blocks dependency upgrades. SSH key entries
+  can still be stored and viewed.
 * The `rbw` client and agent are now fully async internally.
 * The local database is now cached in the agent's state, reducing disk reads.
 * Notifications were refactored to use `tokio::sync::broadcast` instead of a
