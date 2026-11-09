@@ -1173,20 +1173,18 @@ fn generate_totp(secret: &str) -> anyhow::Result<String> {
     // Most authenticators have this built-in, included official Bitwarden clients.
     let secret = secret.replace("algorithm=sha", "algorithm=SHA");
 
-    let totp = match totp_rs::TOTP::from_url(&secret) {
+    let totp = match totp_rs::Totp::from_url(&secret) {
         Ok(totp) => totp,
-        Err(_e) => totp_rs::TOTP::new_unchecked(
-            totp_rs::Algorithm::SHA1,
-            6,
-            1,
-            TOTP_DEFAULT_STEP,
-            decode_totp_secret(&secret)?,
-            None,
-            "".to_string(),
-        ),
+        Err(_e) => totp_rs::Builder::new()
+            .with_algorithm(totp_rs::Algorithm::SHA1)
+            .with_digits(6)
+            .with_skew(1)
+            .with_step_duration(TOTP_DEFAULT_STEP)
+            .with_secret(decode_totp_secret(&secret)?)
+            .build_noncompliant(),
     };
 
-    Ok(totp.generate_current()?)
+    Ok(totp.generate_current().to_string())
 }
 
 #[cfg(test)]
