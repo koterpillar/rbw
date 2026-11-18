@@ -1,4 +1,4 @@
-use std::{io::Write as _, os::unix::ffi::OsStrExt as _, path::PathBuf, time::SystemTime};
+use std::{io::Write as _, os::unix::ffi::OsStrExt as _, path::PathBuf};
 
 use anyhow::Context as _;
 use rbw::{
@@ -948,10 +948,16 @@ pub async fn edit(
 
     if let EntryData::Login { password, .. } = &mut entry.data {
         if let Some(prev_password) = password {
+            let timestamp = jiff::Timestamp::now();
+            let precision = if timestamp.subsec_nanosecond() == 0 {
+                0
+            } else {
+                9
+            };
             entry.history.insert(
                 0,
                 rbw::db::HistoryEntry {
-                    last_used_date: format!("{}", humantime::format_rfc3339(SystemTime::now())),
+                    last_used_date: format!("{timestamp:.precision$}"),
                     password: prev_password.clone(),
                 },
             );
